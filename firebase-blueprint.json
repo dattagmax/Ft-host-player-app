@@ -1,0 +1,602 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Registered player profile for FT HOST esports",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth user ID"
+        },
+        "fullName": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Player full real name"
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Player email address"
+        },
+        "ffUsername": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "Free Fire in-game username"
+        },
+        "ffUid": {
+          "type": "string",
+          "maxLength": 20,
+          "description": "Free Fire numeric player UID"
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 20,
+          "description": "Optional contact number"
+        },
+        "avatarUrl": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Profile picture avatar URL or token"
+        },
+        "tournamentWins": {
+          "type": "number",
+          "description": "Total tournaments won"
+        },
+        "tournamentsPlayed": {
+          "type": "number",
+          "description": "Total tournaments participated in"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of account creation"
+        }
+      },
+      "required": ["uid", "fullName", "email", "ffUsername", "ffUid"]
+    },
+    "Wallet": {
+      "title": "Wallet",
+      "description": "Player esports wallet tracking balance and accounting",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "User ID owning the wallet"
+        },
+        "balance": {
+          "type": "number",
+          "description": "Current playable esports balance"
+        },
+        "withdrawalHoldBalance": {
+          "type": "number",
+          "description": "Funds reserved for pending withdrawal requests"
+        },
+        "totalDeposited": {
+          "type": "number",
+          "description": "Lifetime total deposited amount"
+        },
+        "totalWithdrawn": {
+          "type": "number",
+          "description": "Lifetime total withdrawn amount"
+        },
+        "currency": {
+          "type": "string",
+          "maxLength": 10,
+          "description": "Wallet currency code"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last balance update timestamp"
+        }
+      },
+      "required": ["userId", "balance"]
+    },
+    "Tournament": {
+      "title": "Tournament",
+      "description": "Free Fire esports tournament hosted on FT HOST",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Tournament title name"
+        },
+        "gameMode": {
+          "type": "string",
+          "enum": ["Solo", "Duo", "Squad"],
+          "description": "Free Fire tournament mode"
+        },
+        "map": {
+          "type": "string",
+          "enum": ["Bermuda", "Purgatory", "Kalahari", "Alpine", "NexTerra"],
+          "description": "Free Fire battle royale map"
+        },
+        "entryFee": {
+          "type": "number",
+          "description": "Entry fee amount in wallet balance"
+        },
+        "prizePool": {
+          "type": "number",
+          "description": "Total prize pool awarded to winners"
+        },
+        "totalSlots": {
+          "type": "number",
+          "description": "Max player/team slots (e.g. 48 for Solo, 24 for Duo, 12 for Squad)"
+        },
+        "registeredSlots": {
+          "type": "number",
+          "description": "Current filled slots"
+        },
+        "matchDate": {
+          "type": "string",
+          "description": "Match date string"
+        },
+        "matchTime": {
+          "type": "string",
+          "description": "Match time string with timezone"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["open", "upcoming", "full", "live", "completed"],
+          "description": "Tournament lifecycle status"
+        },
+        "registration_status": {
+          "type": "string",
+          "enum": ["COMING_SOON", "OPEN", "FULL", "CLOSED"],
+          "description": "Registration status for player enrollment"
+        },
+        "rules": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Rules and guidelines for the match"
+        },
+        "bannerUrl": {
+          "type": "string",
+          "maxLength": 400,
+          "description": "Banner graphic image URL"
+        },
+        "roomId": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Free Fire custom room ID"
+        },
+        "roomPassword": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Free Fire custom room password"
+        },
+        "isRoomReleased": {
+          "type": "boolean",
+          "description": "Whether Room ID and Password have been published"
+        },
+        "featured": {
+          "type": "boolean",
+          "description": "Whether tournament is featured on home"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp"
+        }
+      },
+      "required": ["title", "gameMode", "map", "entryFee", "prizePool", "totalSlots", "matchDate", "matchTime", "status"]
+    },
+    "Registration": {
+      "title": "Registration",
+      "description": "Player entry into a tournament",
+      "type": "object",
+      "properties": {
+        "tournamentId": {
+          "type": "string",
+          "description": "ID of tournament joined"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Player user ID"
+        },
+        "ffUsername": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "In-game name"
+        },
+        "ffUid": {
+          "type": "string",
+          "maxLength": 20,
+          "description": "Free Fire UID"
+        },
+        "teamName": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Team name for Duo or Squad"
+        },
+        "teamMembers": {
+          "type": "string",
+          "maxLength": 400,
+          "description": "Team member details"
+        },
+        "slotNumber": {
+          "type": "number",
+          "description": "Assigned slot number"
+        },
+        "entryFeePaid": {
+          "type": "number",
+          "description": "Fee deducted"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["confirmed", "cancelled"],
+          "description": "Registration status"
+        },
+        "registeredAt": {
+          "type": "string",
+          "description": "Registration timestamp"
+        }
+      },
+      "required": ["tournamentId", "userId", "ffUsername", "ffUid", "status"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Financial ledger record for wallet actions",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "User ID of wallet owner"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["deposit", "withdrawal", "entry_fee", "prize_payout", "refund", "gift_code_reward"],
+          "description": "Transaction category"
+        },
+        "amount": {
+          "type": "number",
+          "description": "Monetary value"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "processing", "approved", "completed", "rejected", "cancelled"],
+          "description": "Verification status"
+        },
+        "screenshotUrl": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Secure storage download URL or reference for payment verification screenshot"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Transaction description or payment method reference"
+        },
+        "paymentMethod": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "UPI, Bank Transfer, Net Banking, etc."
+        },
+        "referenceId": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Transaction reference or UTR ID"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp"
+        }
+      },
+      "required": ["userId", "type", "amount", "status"]
+    },
+    "LeaderboardEntry": {
+      "title": "LeaderboardEntry",
+      "description": "Verified tournament rankings and esports points",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Player user ID"
+        },
+        "username": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "Free Fire in-game username"
+        },
+        "ffUid": {
+          "type": "string",
+          "maxLength": 20,
+          "description": "Free Fire player UID"
+        },
+        "avatarUrl": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Avatar URL"
+        },
+        "tournamentWins": {
+          "type": "number",
+          "description": "Total tournaments won"
+        },
+        "points": {
+          "type": "number",
+          "description": "Esports leaderboard points"
+        },
+        "totalPrizeWon": {
+          "type": "number",
+          "description": "Total prize money won"
+        },
+        "period": {
+          "type": "string",
+          "enum": ["weekly", "all_time"],
+          "description": "Leaderboard timeframe"
+        },
+        "rank": {
+          "type": "number",
+          "description": "Current leaderboard rank position"
+        }
+      },
+      "required": ["userId", "username", "ffUid", "points", "tournamentWins", "totalPrizeWon", "period"]
+    },
+    "MatchResult": {
+      "title": "MatchResult",
+      "description": "Verified final match standings and winner verification",
+      "type": "object",
+      "properties": {
+        "tournamentId": {
+          "type": "string",
+          "description": "Tournament ID"
+        },
+        "winnerUsername": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Winning player or team"
+        },
+        "winnerUid": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "Winner Free Fire UID"
+        },
+        "runnerUp": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "2nd position player"
+        },
+        "thirdPlace": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "3rd position player"
+        },
+        "verifiedByAdmin": {
+          "type": "boolean",
+          "description": "Admin verification status"
+        },
+        "publishedAt": {
+          "type": "string",
+          "description": "Results publication time"
+        }
+      },
+      "required": ["tournamentId", "winnerUsername", "verifiedByAdmin"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "In-app notifications for players",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Target player user ID"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Notification title"
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Notification body text"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["tournament", "registration", "room_credentials", "wallet", "leaderboard", "announcement"],
+          "description": "Notification category"
+        },
+        "isRead": {
+          "type": "boolean",
+          "description": "Read status"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Notification timestamp"
+        }
+      },
+      "required": ["userId", "title", "message", "type", "isRead"]
+    },
+    "Announcement": {
+      "title": "Announcement",
+      "description": "Platform-wide esports announcements",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Announcement title"
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Full announcement text"
+        },
+        "tag": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "Badge tag like EVENT, MAINTENANCE, IMPORTANT"
+        },
+        "active": {
+          "type": "boolean",
+          "description": "Whether active"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp"
+        }
+      },
+      "required": ["title", "content", "active"]
+    },
+    "AdminRole": {
+      "title": "AdminRole",
+      "description": "System role for future admin panel operations",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Admin user ID"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["superadmin", "moderator", "host"],
+          "description": "Assigned administrative role"
+        },
+        "grantedAt": {
+          "type": "string",
+          "description": "Timestamp"
+        }
+      },
+      "required": ["userId", "role"]
+    },
+    "GiftCode": {
+      "title": "GiftCode",
+      "description": "Configurable reward gift codes for FT HOST players",
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "Unique redemption code keyword (e.g. TT)"
+        },
+        "rewardAmount": {
+          "type": "number",
+          "description": "Reward balance credited upon redemption in INR"
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Whether code is active"
+        },
+        "maxRedemptions": {
+          "type": "number",
+          "description": "Maximum number of redemptions allowed across all players"
+        },
+        "redemptionCount": {
+          "type": "number",
+          "description": "Total times code has been redeemed"
+        },
+        "totalRewardsDistributed": {
+          "type": "number",
+          "description": "Total monetary amount distributed via this code"
+        },
+        "expiryDate": {
+          "type": "string",
+          "description": "Optional ISO expiry timestamp"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Campaign description"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp"
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Admin who generated the code"
+        }
+      },
+      "required": ["code", "rewardAmount", "isActive"]
+    },
+    "GiftCodeRedemption": {
+      "title": "GiftCodeRedemption",
+      "description": "Audit record of a player redeeming a specific gift code",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Deterministic ID: {codeId}_{userId}"
+        },
+        "codeId": {
+          "type": "string",
+          "description": "Gift code ID redeemed"
+        },
+        "code": {
+          "type": "string",
+          "description": "Uppercase code string"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Player UID who redeemed the code"
+        },
+        "rewardAmount": {
+          "type": "number",
+          "description": "Amount credited"
+        },
+        "redeemedAt": {
+          "type": "string",
+          "description": "ISO timestamp"
+        },
+        "userFfUsername": {
+          "type": "string",
+          "description": "Player in-game name"
+        },
+        "userEmail": {
+          "type": "string",
+          "description": "Player email"
+        }
+      },
+      "required": ["codeId", "code", "userId", "rewardAmount", "redeemedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Player profile information"
+    },
+    "/wallets/{userId}": {
+      "schema": "Wallet",
+      "description": "Player wallet balance and records"
+    },
+    "/tournaments/{tournamentId}": {
+      "schema": "Tournament",
+      "description": "Free Fire tournament events"
+    },
+    "/registrations/{registrationId}": {
+      "schema": "Registration",
+      "description": "Player tournament registrations"
+    },
+    "/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Deposit and withdrawal financial transactions"
+    },
+    "/gift_codes/{codeId}": {
+      "schema": "GiftCode",
+      "description": "Configurable gift code documents"
+    },
+    "/gift_code_redemptions/{redemptionId}": {
+      "schema": "GiftCodeRedemption",
+      "description": "Gift code redemption ledger and duplicate prevention records"
+    },
+    "/leaderboard/{entryId}": {
+      "schema": "LeaderboardEntry",
+      "description": "Esports leaderboard rankings"
+    },
+    "/match_results/{matchResultId}": {
+      "schema": "MatchResult",
+      "description": "Verified tournament match standings"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "Player in-app notifications"
+    },
+    "/announcements/{announcementId}": {
+      "schema": "Announcement",
+      "description": "Platform esports announcements"
+    },
+    "/admin_roles/{userId}": {
+      "schema": "AdminRole",
+      "description": "Admin authorization roles"
+    }
+  }
+}

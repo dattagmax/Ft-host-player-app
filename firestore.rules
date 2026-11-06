@@ -1,0 +1,213 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admin_roles/$(request.auth.uid)) ||
+        request.auth.token.email == 'amitdatta591@gmail.com'
+      );
+    }
+
+    // Entity validation helpers
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'fullName', 'email', 'ffUsername', 'ffUid']) &&
+        data.uid is string && data.uid.size() <= 128 &&
+        data.fullName is string && data.fullName.size() <= 100 &&
+        data.email is string && data.email.size() <= 120 &&
+        data.ffUsername is string && data.ffUsername.size() <= 30 &&
+        data.ffUid is string && data.ffUid.size() <= 20;
+    }
+
+    function isValidWallet(data) {
+      return data.keys().hasAll(['userId', 'balance']) &&
+        data.userId is string && data.userId.size() <= 128 &&
+        data.balance is number;
+    }
+
+    function isValidTournament(data) {
+      return data.keys().hasAll(['title', 'gameMode', 'map', 'entryFee', 'prizePool', 'totalSlots', 'matchDate', 'matchTime', 'status']) &&
+        data.title is string && data.title.size() <= 100 &&
+        data.gameMode in ['Solo', 'Duo', 'Squad'] &&
+        data.map in ['Bermuda', 'Purgatory', 'Kalahari', 'Alpine', 'NexTerra'] &&
+        data.entryFee is number &&
+        data.prizePool is number &&
+        data.totalSlots is number &&
+        data.status in ['open', 'upcoming', 'full', 'live', 'completed'];
+    }
+
+    function isValidRegistration(data) {
+      return data.keys().hasAll(['tournamentId', 'userId', 'ffUsername', 'ffUid', 'status']) &&
+        data.tournamentId is string && data.tournamentId.size() <= 128 &&
+        data.userId is string && data.userId.size() <= 128 &&
+        data.ffUsername is string && data.ffUsername.size() <= 30 &&
+        data.ffUid is string && data.ffUid.size() <= 20 &&
+        data.status in ['confirmed', 'cancelled'];
+    }
+
+    function isValidTransaction(data) {
+      return data.keys().hasAll(['userId', 'type', 'amount', 'status']) &&
+        data.userId is string && data.userId.size() <= 128 &&
+        data.type in ['deposit', 'withdrawal', 'entry_fee', 'prize_payout', 'refund', 'gift_code_reward'] &&
+        data.amount is number &&
+        data.status in ['pending', 'processing', 'approved', 'completed', 'rejected', 'cancelled'];
+    }
+
+    // Health check test doc
+    match /test/{docId} {
+      allow read: if true;
+    }
+
+    // Users Collection (PII Isolated: Owner or Admin only)
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId) && isValidUser(incoming()) && incoming().uid == request.auth.uid;
+      allow update: if (isOwner(userId) || isAdmin()) && isValidUser(incoming()) &&
+        incoming().uid == existing().uid &&
+        (isAdmin() || incoming().diff(existing()).affectedKeys().hasOnly(['fullName', 'ffUsername', 'ffUid', 'phone', 'avatarUrl', 'tournamentsPlayed', 'tournamentWins']));
+      allow delete: if isAdmin();
+    }
+
+    // Wallets Collection
+    match /wallets/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId) && isValidWallet(incoming()) && incoming().userId == request.auth.uid;
+      allow update: if (isOwner(userId) || isAdmin()) && isValidWallet(incoming()) &&
+        incoming().userId == existing().userId;
+      allow delete: if isAdmin();
+    }
+
+    // Tournaments Collection
+    match /tournaments/{tournamentId} {
+      allow get, list: if true;
+      allow create: if isAdmin() || (
+        isValidTournament(incoming()) &&
+        tournamentId.matches('^ft-tourney-[0-9]+$')
+      );
+      allow delete: if isAdmin();
+      allow update: if isAdmin() || (
+        isSignedIn() &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['registeredSlots', 'registration_status']) &&
+        incoming().registeredSlots is number &&
+        incoming().registration_status in ['COMING_SOON', 'OPEN', 'FULL', 'CLOSED']
+      );
+    }
+
+    // Gift Codes Collection
+    match /gift_codes/{codeId} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create: if isAdmin() || (codeId.matches('^[A-Z0-9_\\-]+$') && incoming().keys().hasAll(['code', 'rewardAmount']));
+      allow delete: if isAdmin();
+      allow update: if isAdmin() || (
+        isSignedIn() &&
+        incoming().diff(existing()).affectedKeys().hasAny(['redemptionCount', 'redemptionsCount', 'totalRewardsDistributed']) &&
+        (incoming().diff(existing()).affectedKeys().hasOnly(['redemptionCount', 'totalRewardsDistributed']) || incoming().diff(existing()).affectedKeys().hasOnly(['redemptionCount', 'redemptionsCount', 'totalRewardsDistributed']))
+      );
+    }
+
+    // Gift Code Redemptions Collection
+    match /gift_code_redemptions/{redemptionId} {
+      allow get: if isSignedIn() && (redemptionId.matches('^.*_' + request.auth.uid + '$') || resource == null || resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() &&
+        incoming().userId == request.auth.uid &&
+        incoming().keys().hasAll(['codeId', 'userId', 'rewardAmount', 'redeemedAt']) &&
+        incoming().rewardAmount is number;
+      allow update, delete: if isAdmin();
+    }
+
+    // Registrations Collection
+    match /registrations/{registrationId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && isValidRegistration(incoming()) && incoming().userId == request.auth.uid;
+      allow update: if isAdmin() || (
+        isSignedIn() &&
+        resource.data.userId == request.auth.uid &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['status']) &&
+        incoming().status in ['confirmed', 'cancelled']
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Transactions Collection
+    match /transactions/{transactionId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && isValidTransaction(incoming()) && incoming().userId == request.auth.uid;
+      allow update: if isAdmin() || (
+        isSignedIn() &&
+        resource.data.userId == request.auth.uid &&
+        resource.data.status == 'pending' &&
+        incoming().diff(existing()).affectedKeys().hasAny(['status', 'cancellationReason', 'updatedAt']) &&
+        incoming().status == 'cancelled'
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Leaderboard Collection
+    match /leaderboard/{entryId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Match Results Collection
+    match /match_results/{matchResultId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Notifications Collection
+    match /notifications/{notificationId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && (incoming().userId == request.auth.uid || isAdmin());
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['isRead']) &&
+        incoming().isRead is bool;
+      allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // Announcements Collection
+    match /announcements/{announcementId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Admin Roles Collection
+    match /admin_roles/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "/",
+  "name": "FT HOST - Free Fire Tournament Hosting",
+  "short_name": "FT HOST",
+  "description": "Premium Free Fire Esports Tournament Hosting Platform",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#070d19",
+  "theme_color": "#06b6d4",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

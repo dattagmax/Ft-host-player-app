@@ -1,0 +1,6 @@
+{
+  "name": "FT HOST",
+  "description": "Free Fire tournament hosting esports platform for players to register, join tournaments, manage wallet, view match rooms, and compete on leaderboards.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-ice: #38bdf8;
+    --color-aqua: #22d3ee;
+    --color-navy-dark: #060d19;
+    --color-navy-card: #0b172a;
+  }
+
+  body {
+    background-color: #050b14;
+    color: #f1f5f9;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow-x: hidden;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Custom esports styling */
+.font-esports {
+  font-family: 'Rajdhani', sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.font-heading {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* Glassmorphism & Liquid Glass */
+.glass-panel {
+  background: rgba(11, 23, 42, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.glass-panel-elevated {
+  background: rgba(15, 30, 54, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(34, 211, 238, 0.28);
+  box-shadow: 0 10px 30px -10px rgba(6, 182, 212, 0.2);
+}
+
+.glass-panel-interactive {
+  background: rgba(11, 23, 42, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(56, 189, 248, 0.12);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel-interactive:hover {
+  background: rgba(15, 30, 54, 0.82);
+  border-color: rgba(34, 211, 238, 0.35);
+  box-shadow: 0 4px 20px -2px rgba(56, 189, 248, 0.25);
+  transform: translateY(-2px);
+}
+
+.glass-nav {
+  background: rgba(6, 13, 25, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(56, 189, 248, 0.18);
+}
+
+/* Ice & Aqua glow utilities */
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.35);
+}
+
+.glow-ice {
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+}
+
+.text-glow {
+  text-shadow: 0 0 12px rgba(34, 211, 238, 0.6);
+}
+
+/* Hide scrollbar for tabs */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom cyber cut corner button */
+.cyber-btn {
+  position: relative;
+  transition: all 0.2s ease;
+}
+.cyber-btn:active {
+  transform: scale(0.98);
+}
